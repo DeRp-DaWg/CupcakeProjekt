@@ -15,7 +15,7 @@
 
     <jsp:body>
 
-        <h3>You can log in here</h3>
+        <h3>Accounts</h3>
 
         <form action="login" method="post">
             <label for="username">Username: </label>

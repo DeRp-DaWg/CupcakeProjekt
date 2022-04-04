@@ -33,6 +33,9 @@
                     <a class="nav-item nav-link" href="${pageContext.request.contextPath}/">Page 1</a>
                     <a class="nav-item nav-link" href="${pageContext.request.contextPath}/">Page 2</a>
                     <a class="nav-item nav-link" href="${pageContext.request.contextPath}/">Page 3</a>
+                    <c:if test="${sessionScope.user.role.equals('admin')}">
+                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/viewaccounts.jsp">Accounts</a>
+                    </c:if>
                     <c:if test="${sessionScope.user == null }">
                         <a class="nav-item nav-link" href="${pageContext.request.contextPath}/login.jsp">Login</a>
                     </c:if>

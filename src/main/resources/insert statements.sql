@@ -1,0 +1,1 @@
+INSERT INTO cupcake.user VALUES ('1','admin','1234','admin'),('2','user','1234','user');
