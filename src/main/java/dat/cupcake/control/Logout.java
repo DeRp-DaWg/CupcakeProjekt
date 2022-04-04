@@ -1,6 +1,6 @@
-package dat.startcode.control;
+package dat.cupcake.control;
 
-import dat.startcode.model.persistence.ConnectionPool;
+import dat.cupcake.model.persistence.ConnectionPool;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

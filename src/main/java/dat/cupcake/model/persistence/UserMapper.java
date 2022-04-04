@@ -1,7 +1,7 @@
-package dat.startcode.model.persistence;
+package dat.cupcake.model.persistence;
 
-import dat.startcode.model.entities.User;
-import dat.startcode.model.exceptions.DatabaseException;
+import dat.cupcake.model.entities.User;
+import dat.cupcake.model.exceptions.DatabaseException;
 
 import java.sql.*;
 import java.util.logging.Level;

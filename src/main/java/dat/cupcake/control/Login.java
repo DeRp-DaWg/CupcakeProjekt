@@ -1,10 +1,10 @@
-package dat.startcode.control;
+package dat.cupcake.control;
 
-import dat.startcode.model.config.ApplicationStart;
-import dat.startcode.model.entities.User;
-import dat.startcode.model.exceptions.DatabaseException;
-import dat.startcode.model.persistence.UserMapper;
-import dat.startcode.model.persistence.ConnectionPool;
+import dat.cupcake.model.config.ApplicationStart;
+import dat.cupcake.model.entities.User;
+import dat.cupcake.model.exceptions.DatabaseException;
+import dat.cupcake.model.persistence.UserMapper;
+import dat.cupcake.model.persistence.ConnectionPool;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

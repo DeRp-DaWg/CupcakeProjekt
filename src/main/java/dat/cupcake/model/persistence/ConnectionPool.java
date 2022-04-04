@@ -1,4 +1,4 @@
-package dat.startcode.model.persistence;
+package dat.cupcake.model.persistence;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
