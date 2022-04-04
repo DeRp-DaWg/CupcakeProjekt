@@ -6,11 +6,11 @@
 
 <t:pagetemplate>
     <jsp:attribute name="header">
-        Login
+        Order
     </jsp:attribute>
 
     <jsp:attribute name="footer">
-        Login
+        Order
     </jsp:attribute>
 
     <jsp:body>
