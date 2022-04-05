@@ -1,7 +1,6 @@
 package dat.cupcake.model.persistence;
 
 import dat.cupcake.model.entities.Bottom;
-import dat.cupcake.model.entities.Topping;
 import dat.cupcake.model.exceptions.DatabaseException;
 
 import java.sql.Connection;
@@ -15,6 +14,42 @@ public class BottomMapper {
     public BottomMapper(ConnectionPool connectionPool)
     {
         this.connectionPool = connectionPool;
+    }
+    
+    public Bottom[] getBottoms() throws DatabaseException {
+        Bottom[] bottoms;
+        int rows = 0;
+        String rowCountSql = "SELECT count(*) FROM bottom";
+        String sql = "SELECT * FROM bottom";
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                rows = rs.getInt("count(*)");
+                bottoms = new Bottom[rows];
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ResultSet rs = ps.executeQuery();
+                int rowCount = 0;
+                while (rs.next()) {
+                    int id = rs.getInt("bottom_id");
+                    int price = rs.getInt("bottom_price");
+                    String name = rs.getString("bottom_name");
+                    Bottom bottom = new Bottom(id, price, name);
+                    bottoms[rowCount] = bottom;
+                    rowCount++;
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+        return bottoms;
     }
     
     public Bottom readBottom(int bottomId) throws DatabaseException {
@@ -40,7 +75,7 @@ public class BottomMapper {
         if (bottomName == null) {
             throw new DatabaseException("Bottom with id: " + bottomId + " was not found in the database.");
         }
-        return null;
+        return bottom;
     }
     
     public Bottom readBottomByName(String bottomName) throws DatabaseException {

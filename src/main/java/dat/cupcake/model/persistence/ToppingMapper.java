@@ -16,6 +16,42 @@ public class ToppingMapper {
         this.connectionPool = connectionPool;
     }
     
+    public Topping[] getToppings() throws DatabaseException {
+        Topping[] toppings;
+        int rows = 0;
+        String rowCountSql = "SELECT count(*) FROM topping";
+        String sql = "SELECT * FROM topping";
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                rows = rs.getInt("count(*)");
+                toppings = new Topping[rows];
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ResultSet rs = ps.executeQuery();
+                int rowCount = 0;
+                while (rs.next()) {
+                    int id = rs.getInt("topping_id");
+                    int price = rs.getInt("topping_price");
+                    String name = rs.getString("topping_name");
+                    Topping topping = new Topping(id, price, name);
+                    toppings[rowCount] = topping;
+                    rowCount++;
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+        return toppings;
+    }
+    
     public Topping readTopping(int toppingId) throws DatabaseException {
         Topping topping = null;
         String sql =
@@ -39,7 +75,7 @@ public class ToppingMapper {
         if (toppingName == null) {
             throw new DatabaseException("Topping with id: " + toppingId + " was not found in the database.");
         }
-        return null;
+        return topping;
     }
     
     public Topping readToppingByName(String toppingName) throws DatabaseException {

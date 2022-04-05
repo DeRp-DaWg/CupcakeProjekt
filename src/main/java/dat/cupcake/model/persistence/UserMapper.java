@@ -34,8 +34,9 @@ public class UserMapper implements IUserMapper
                 ResultSet rs = ps.executeQuery();
                 if (rs.next())
                 {
+                    int userId = rs.getInt("user_id");
                     String role = rs.getString("role");
-                    user = new User(email, password, role);
+                    user = new User(userId, email, password, role);
                 } else
                 {
                     throw new DatabaseException("Wrong email or password");

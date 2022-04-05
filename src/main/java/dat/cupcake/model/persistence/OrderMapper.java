@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class OrderMapper {
     ConnectionPool connectionPool;
@@ -21,7 +22,6 @@ public class OrderMapper {
         UserMapper userMapper = new UserMapper(connectionPool);
         ToppingMapper toppingMapper = new ToppingMapper(connectionPool);
         BottomMapper bottomMapper = new BottomMapper(connectionPool);
-        int rows = 0;
         String rowCountSql = "SELECT count(*) FROM orders";
     
         Order[] orders = null;
@@ -36,7 +36,7 @@ public class OrderMapper {
             try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
                 ResultSet rs = ps.executeQuery();
                 rs.next();
-                rows = rs.getInt("count(*)");
+                int rows = rs.getInt("count(*)");
                 orders = new Order[rows];
             }
         }
@@ -51,7 +51,7 @@ public class OrderMapper {
                     int orderId = rs.getInt("order_id");
                     int userId = rs.getInt("user_id");
                     Status status = Status.valueOf(rs.getString("status"));
-                    LocalDateTime date = LocalDateTime.parse(rs.getString("date"));
+                    LocalDateTime date = rs.getObject("date", LocalDateTime.class);
                     int price = rs.getInt("price");
                     int toppingId = rs.getInt("topping_id");
                     int bottomId = rs.getInt("bottom_id");
@@ -67,6 +67,56 @@ public class OrderMapper {
         }
         for (Order order : orders) {
             order.setUser(userMapper.getUser(order.getUser().getUserId()));
+            order.setTopping(toppingMapper.readTopping(order.getTopping().getId()));
+            order.setBottom(bottomMapper.readBottom(order.getBottom().getId()));
+        }
+        return orders;
+    }
+    
+    public Order[] getOrdersByUser(User user) throws DatabaseException {
+        ToppingMapper toppingMapper = new ToppingMapper(connectionPool);
+        BottomMapper bottomMapper = new BottomMapper(connectionPool);
+        String rowCountSql = "SELECT count(*) FROM orders";
+        
+        Order[] orders;
+        String sql =
+                "SELECT * FROM orders " +
+                "WHERE user_id = ?";
+    
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                int rows = rs.getInt("count(*)");
+                orders = new Order[rows];
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+        
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, user.getUserId());
+                ResultSet rs = ps.executeQuery();
+                int rowCount = 0;
+                while (rs.next()) {
+                    int orderId = rs.getInt("order_id");
+                    Status status = Status.valueOf(rs.getString("status"));
+                    LocalDateTime date = rs.getObject("date", LocalDateTime.class);
+                    int toppingId = rs.getInt("topping_id");
+                    int bottomId = rs.getInt("bottom_id");
+                    //Create the individual order. The foreign keys gets stored in the corresponding object temporarily.
+                    Order order = new Order(orderId, user, status, date, new Topping(toppingId), new Bottom(bottomId));
+                    orders[rowCount] = order;
+                    rowCount++;
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+        for (Order order : orders) {
             order.setTopping(toppingMapper.readTopping(order.getTopping().getId()));
             order.setBottom(bottomMapper.readBottom(order.getBottom().getId()));
         }

@@ -30,16 +30,16 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a>
-                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/order.jsp">Order</a>
+                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/index">Home</a>
+                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/order">Order</a>
                     <c:if test="${sessionScope.user.role.equals('admin')}">
-                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/viewaccounts.jsp">Accounts</a>
+                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/viewaccounts">Accounts</a>
                     </c:if>
                     <c:if test="${sessionScope.user.role.equals('admin')}">
-                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/vieworders.jsp">Orders</a>
+                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/vieworders">Orders</a>
                     </c:if>
                     <c:if test="${sessionScope.user == null }">
-                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/login.jsp">Login</a>
+                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/login">Login</a>
                     </c:if>
                     <c:if test="${sessionScope.user != null }">
                         <a class="nav-item nav-link" href="${pageContext.request.contextPath}/logout">Log out</a>
