@@ -27,10 +27,10 @@ public class OrderMapper {
         Order[] orders = null;
         String sql =
                 "SELECT order_id, user_id, status, date, SUM(topping_price + bottom_price) total_price, topping_id, bottom_id FROM orders " +
-                        "INNER JOIN bottom " +
-                        "using(bottom_id) " +
-                        "INNER JOIN topping " +
-                        "using(topping_id)";
+                "INNER JOIN bottom " +
+                "using(bottom_id) " +
+                "INNER JOIN topping " +
+                "using(topping_id)";
         
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
@@ -75,13 +75,13 @@ public class OrderMapper {
     
     public void createOrder(Order order) throws DatabaseException {
         String sql =
-                "INSERT INTO orders (bottom_id, topping_id, user_id, status, date) " +
+                "INSERT INTO orders (user_id, topping_id, bottom_id, status, date) " +
                 "VALUES (?, ?, ?, ?, ?)";
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, order.getBottom().getId());
+                ps.setInt(1, order.getUser().getUserId());
                 ps.setInt(2, order.getTopping().getId());
-                ps.setInt(3, order.getUser().getUserId());
+                ps.setInt(3, order.getBottom().getId());
                 ps.setString(4, order.getStatus().toString());
                 ps.setString(5, order.getDate().toString());
                 ps.executeUpdate();
@@ -124,10 +124,37 @@ public class OrderMapper {
     }
     
     public void updateOrder(Order order) throws DatabaseException {
-    
+        String sql =
+                "UPDATE orders " +
+                "SET topping_id = ?, bottom_id = ?, status = ?, date = ? " +
+                "WHERE order_id = ?";
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, order.getTopping().getId());
+                ps.setInt(2, order.getBottom().getId());
+                ps.setString(3, order.getStatus().toString());
+                ps.setString(4, order.getDate().toString());
+                ps.setInt(5, order.getOrderId());
+                ps.executeUpdate();
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
     }
     
-    public void deleteOrder(int orderId) throws DatabaseException {
-    
+    public void deleteOrder(Order order) throws DatabaseException {
+        String sql =
+                "DELETE FROM orders " +
+                "WHERE order_id = ?";
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, order.getOrderId());
+                ps.executeUpdate();
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
     }
 }
