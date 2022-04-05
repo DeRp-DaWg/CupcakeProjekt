@@ -30,11 +30,13 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/">Page 1</a>
-                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/">Page 2</a>
-                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/">Page 3</a>
+                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a>
+                    <a class="nav-item nav-link" href="${pageContext.request.contextPath}/order.jsp">Order</a>
                     <c:if test="${sessionScope.user.role.equals('admin')}">
                         <a class="nav-item nav-link" href="${pageContext.request.contextPath}/viewaccounts.jsp">Accounts</a>
+                    </c:if>
+                    <c:if test="${sessionScope.user.role.equals('admin')}">
+                        <a class="nav-item nav-link" href="${pageContext.request.contextPath}/vieworders.jsp">Orders</a>
                     </c:if>
                     <c:if test="${sessionScope.user == null }">
                         <a class="nav-item nav-link" href="${pageContext.request.contextPath}/login.jsp">Login</a>
@@ -63,7 +65,7 @@
         </div>
         <div class="col">
             <jsp:invoke fragment="footer"/><br/>
-            <p>&copy; 2022 Cphbusiness</p>
+            <p>&copy; 2022 Olsker Cupcakes</p>
         </div>
         <div class="col">
             Datamatikeruddannelsen<br/>

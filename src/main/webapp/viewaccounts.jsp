@@ -15,15 +15,26 @@
 
     <jsp:body>
 
-        <h3>Accounts</h3>
+        <h3>Here you can see all users</h3>
 
-        <form action="login" method="post">
-            <label for="username">Username: </label>
-            <input type="text" id="username" name="username"/>
-            <label for="password">Password: </label>
-            <input type="password" id="password" name="password"/>
-            <input type="submit"  value="Log in"/>
-        </form>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <c:forEach var="user" items="${requestScope.userList}">
+                    <tr>
+                        <td>${user.email}</td>
+                        <td>${user.password}</td>
+                        <td>${user.role}</td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
 
     </jsp:body>
 </t:pagetemplate>
