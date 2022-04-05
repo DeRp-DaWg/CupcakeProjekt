@@ -15,15 +15,16 @@
 
     <jsp:body>
 
-        <h3>You can log in here</h3>
+        <h3>You can order your cupcake here</h3>
 
-        <form action="login" method="post">
-            <label for="username">Username: </label>
-            <input type="text" id="username" name="username"/>
-            <label for="password">Password: </label>
-            <input type="password" id="password" name="password"/>
-            <input type="submit"  value="Log in"/>
-        </form>
+        <label for="bottom"></label>
+        <c:forEach var="bottomOrder" items="${requestScope.orderList}">
+        <select id="bottom" name="bottom">
+            <option value="${orderList.get(0)}"></option>
+        </select>
+        </c:forEach>
+
+
 
     </jsp:body>
 </t:pagetemplate>
