@@ -103,4 +103,19 @@ public class ToppingMapper {
             }
         }
     }
+    
+    public void deleteTopping(Topping topping) throws DatabaseException {
+        String sql =
+                "DELETE FROM topping " +
+                "WHERE topping_id = ?";
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, topping.getId());
+                ps.executeUpdate();
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+    }
 }

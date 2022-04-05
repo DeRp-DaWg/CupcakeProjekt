@@ -1,6 +1,7 @@
 package dat.cupcake.model.persistence;
 
 import dat.cupcake.model.entities.Bottom;
+import dat.cupcake.model.entities.Topping;
 import dat.cupcake.model.exceptions.DatabaseException;
 
 import java.sql.Connection;
@@ -101,6 +102,21 @@ public class BottomMapper {
             catch (SQLException e) {
                 throw new DatabaseException("An error occurred while trying to create bottom: " + bottom);
             }
+        }
+    }
+    
+    public void deleteBottom(Bottom bottom) throws DatabaseException {
+        String sql =
+                "DELETE FROM bottom " +
+                "WHERE bottom_id = ?";
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, bottom.getId());
+                ps.executeUpdate();
+            }
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
         }
     }
 }
