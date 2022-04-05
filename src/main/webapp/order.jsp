@@ -17,14 +17,13 @@
 
         <h3>You can order your cupcake here</h3>
 
-        <label for="bottom"></label>
-        <c:forEach var="bottomOrder" items="${requestScope.orderList}">
-        <select id="bottom" name="bottom">
-            <option value="${orderList.get(0)}"></option>
-        </select>
-        </c:forEach>
-
-
+        <form action="">
+            <label for="bottom"></label>
+            <select id="bottom" name="bottom">
+                <option value="${orderList.get(0)}"></option>
+            </select>
+            <input type="submit">
+        </form>
 
     </jsp:body>
 </t:pagetemplate>

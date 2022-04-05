@@ -15,15 +15,30 @@
 
     <jsp:body>
 
-        <h3>You can log in here</h3>
+        <h3>Here you can see all orders</h3>
 
-        <form action="login" method="post">
-            <label for="username">Username: </label>
-            <input type="text" id="username" name="username"/>
-            <label for="password">Password: </label>
-            <input type="password" id="password" name="password"/>
-            <input type="submit"  value="Log in"/>
-        </form>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>Bottom</th>
+                <th>Topping</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <c:forEach var="order" items="${requestScope.orderList}">
+                <tr>
+                    <td>${order.user}</td>
+                    <td>${order.bottom}</td>
+                    <td>${order.topping}</td>
+                    <td>${order.status}</td>
+                    <td>${order.date}</td>
+                </tr>
+            </c:forEach>
+            </tbody>
+        </table>
 
     </jsp:body>
 </t:pagetemplate>
