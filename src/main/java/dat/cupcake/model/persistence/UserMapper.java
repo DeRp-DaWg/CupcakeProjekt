@@ -47,6 +47,14 @@ public class UserMapper implements IUserMapper
         }
         return user;
     }
+    
+    public User getUser(User user) throws DatabaseException {
+        return null;
+    }
+    
+    public User getUser(int userId) throws DatabaseException {
+        return getUser(new User(userId, null, null, null));
+    }
 
     @Override
     public User createUser(String email, String password, String role) throws DatabaseException
