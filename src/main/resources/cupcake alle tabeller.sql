@@ -66,7 +66,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `cupcake`.`orders` ;
 
 CREATE TABLE IF NOT EXISTS `cupcake`.`orders` (
-  `order_id` INT NOT NULL,
+  `order_id` INT NOT NULL AUTO_INCREMENT,
   `bottom_id` INT NOT NULL,
   `topping_id` INT NOT NULL,
   `user_id` INT NOT NULL,
