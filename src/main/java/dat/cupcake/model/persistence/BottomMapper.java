@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class BottomMapper {
     ConnectionPool connectionPool;
@@ -17,39 +18,24 @@ public class BottomMapper {
     }
     
     public Bottom[] getBottoms() throws DatabaseException {
-        Bottom[] bottoms;
-        int rows = 0;
-        String rowCountSql = "SELECT count(*) FROM bottom";
+        ArrayList<Bottom> bottoms = new ArrayList<>();
         String sql = "SELECT * FROM bottom";
-        try (Connection connection = connectionPool.getConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                rows = rs.getInt("count(*)");
-                bottoms = new Bottom[rows];
-            }
-        }
-        catch (SQLException e) {
-            throw new DatabaseException(e, "Something went wrong");
-        }
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 ResultSet rs = ps.executeQuery();
-                int rowCount = 0;
                 while (rs.next()) {
                     int id = rs.getInt("bottom_id");
                     int price = rs.getInt("bottom_price");
                     String name = rs.getString("bottom_name");
                     Bottom bottom = new Bottom(id, price, name);
-                    bottoms[rowCount] = bottom;
-                    rowCount++;
+                    bottoms.add(bottom);
                 }
             }
         }
         catch (SQLException e) {
             throw new DatabaseException(e, "Something went wrong");
         }
-        return bottoms;
+        return bottoms.toArray(new Bottom[0]);
     }
     
     public Bottom readBottom(int bottomId) throws DatabaseException {

@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 public class OrderMapper {
     ConnectionPool connectionPool;
@@ -20,45 +21,33 @@ public class OrderMapper {
     
     public Order[] getOrders() throws DatabaseException {
         UserMapper userMapper = new UserMapper(connectionPool);
-        ToppingMapper toppingMapper = new ToppingMapper(connectionPool);
-        BottomMapper bottomMapper = new BottomMapper(connectionPool);
-        String rowCountSql = "SELECT count(*) FROM orders";
-    
-        Order[] orders = null;
+        
+        ArrayList<Order> orders = new ArrayList<>();
         String sql =
-                "SELECT order_id, user_id, status, date, SUM(topping_price + bottom_price) total_price, topping_id, bottom_id FROM orders " +
+                "SELECT * FROM orders " +
                 "INNER JOIN bottom " +
                 "using(bottom_id) " +
                 "INNER JOIN topping " +
                 "using(topping_id)";
         
         try (Connection connection = connectionPool.getConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                int rows = rs.getInt("count(*)");
-                orders = new Order[rows];
-            }
-        }
-        catch (SQLException e) {
-            throw new DatabaseException(e, "Something went wrong");
-        }
-        try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 ResultSet rs = ps.executeQuery();
-                int rowCount = 0;
                 while (rs.next()) {
                     int orderId = rs.getInt("order_id");
                     int userId = rs.getInt("user_id");
                     Status status = Status.valueOf(rs.getString("status"));
                     LocalDateTime date = rs.getObject("date", LocalDateTime.class);
-                    int price = rs.getInt("price");
                     int toppingId = rs.getInt("topping_id");
+                    int toppingPrice = rs.getInt("topping_price");
+                    String toppingName = rs.getString("topping_name");
                     int bottomId = rs.getInt("bottom_id");
-                    //Create the individual order. The foreign keys gets stored in the corresponding object temporarily.
-                    Order order = new Order(orderId, new User(userId), status, date, price, new Topping(toppingId), new Bottom(bottomId));
-                    orders[rowCount] = order;
-                    rowCount++;
+                    int bottomPrice = rs.getInt("bottom_price");
+                    String bottomName = rs.getString("bottom_name");
+                    Order order = new Order(orderId, new User(userId), status, date,
+                            new Topping(toppingId, toppingPrice, toppingName),
+                            new Bottom(bottomId, bottomPrice, bottomName));
+                    orders.add(order);
                 }
             }
         }
@@ -67,60 +56,80 @@ public class OrderMapper {
         }
         for (Order order : orders) {
             order.setUser(userMapper.getUser(order.getUser().getUserId()));
-            order.setTopping(toppingMapper.readTopping(order.getTopping().getId()));
-            order.setBottom(bottomMapper.readBottom(order.getBottom().getId()));
         }
-        return orders;
+        return orders.toArray(new Order[0]);
     }
     
     public Order[] getOrdersByUser(User user) throws DatabaseException {
-        ToppingMapper toppingMapper = new ToppingMapper(connectionPool);
-        BottomMapper bottomMapper = new BottomMapper(connectionPool);
-        String rowCountSql = "SELECT count(*) FROM orders";
-        
-        Order[] orders;
+        ArrayList<Order> orders = new ArrayList<>();
         String sql =
                 "SELECT * FROM orders " +
-                "WHERE user_id = ?";
-    
-        try (Connection connection = connectionPool.getConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                int rows = rs.getInt("count(*)");
-                orders = new Order[rows];
-            }
-        }
-        catch (SQLException e) {
-            throw new DatabaseException(e, "Something went wrong");
-        }
+                "INNER JOIN bottom " +
+                "using(bottom_id) " +
+                "INNER JOIN topping " +
+                "using(topping_id)";
         
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, user.getUserId());
                 ResultSet rs = ps.executeQuery();
-                int rowCount = 0;
                 while (rs.next()) {
                     int orderId = rs.getInt("order_id");
                     Status status = Status.valueOf(rs.getString("status"));
                     LocalDateTime date = rs.getObject("date", LocalDateTime.class);
                     int toppingId = rs.getInt("topping_id");
+                    int toppingPrice = rs.getInt("topping_price");
+                    String toppingName = rs.getString("topping_name");
                     int bottomId = rs.getInt("bottom_id");
-                    //Create the individual order. The foreign keys gets stored in the corresponding object temporarily.
-                    Order order = new Order(orderId, user, status, date, new Topping(toppingId), new Bottom(bottomId));
-                    orders[rowCount] = order;
-                    rowCount++;
+                    int bottomPrice = rs.getInt("bottom_price");
+                    String bottomName = rs.getString("bottom_name");
+                    Order order = new Order(orderId, user, status, date,
+                            new Topping(toppingId, toppingPrice, toppingName),
+                            new Bottom(bottomId, bottomPrice, bottomName));
+                    orders.add(order);
                 }
             }
         }
         catch (SQLException e) {
             throw new DatabaseException(e, "Something went wrong");
         }
-        for (Order order : orders) {
-            order.setTopping(toppingMapper.readTopping(order.getTopping().getId()));
-            order.setBottom(bottomMapper.readBottom(order.getBottom().getId()));
+        return orders.toArray(new Order[0]);
+    }
+    
+    public Order[] getActiveOrdersByUser(User user) throws DatabaseException {
+        ArrayList<Order> orders = new ArrayList<>();
+        String sql =
+                "SELECT * FROM orders " +
+                "INNER JOIN bottom " +
+                "using(bottom_id) " +
+                "INNER JOIN topping " +
+                "using(topping_id) " +
+                "WHERE user_id = ? AND (status = 'PREPARING' OR status = 'AWAITING_PICKUP')";
+        
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, user.getUserId());
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    int orderId = rs.getInt("order_id");
+                    Status status = Status.valueOf(rs.getString("status"));
+                    LocalDateTime date = rs.getObject("date", LocalDateTime.class);
+                    int toppingId = rs.getInt("topping_id");
+                    int toppingPrice = rs.getInt("topping_price");
+                    String toppingName = rs.getString("topping_name");
+                    int bottomId = rs.getInt("bottom_id");
+                    int bottomPrice = rs.getInt("bottom_price");
+                    String bottomName = rs.getString("bottom_name");
+                    Order order = new Order(orderId, user, status, date,
+                            new Topping(toppingId, toppingPrice, toppingName),
+                            new Bottom(bottomId, bottomPrice, bottomName));
+                    orders.add(order);
+                }
+            }
         }
-        return orders;
+        catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+        return orders.toArray(new Order[0]);
     }
     
     public void createOrder(Order order) throws DatabaseException {
@@ -146,6 +155,10 @@ public class OrderMapper {
         Order order = null;
         String sql =
                 "SELECT * FROM orders " +
+                "INNER JOIN bottom " +
+                "using(bottom_id) " +
+                "INNER JOIN topping " +
+                "using(topping_id) " +
                 "WHERE order_id = ?";
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -153,23 +166,23 @@ public class OrderMapper {
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     int userId = rs.getInt("user_id");
-                    int toppingId = rs.getInt("topping_id");
-                    int bottomId = rs.getInt("bottom_id");
                     Status status = Status.valueOf(rs.getString("status"));
-                    LocalDateTime date = LocalDateTime.parse(rs.getString("date"));
-                    order = new Order(orderId, new User(userId), status, date, new Topping(toppingId), new Bottom(bottomId));
+                    LocalDateTime date = rs.getObject("date", LocalDateTime.class);
+                    int toppingId = rs.getInt("topping_id");
+                    int toppingPrice = rs.getInt("topping_price");
+                    String toppingName = rs.getString("topping_name");
+                    int bottomId = rs.getInt("bottom_id");
+                    int bottomPrice = rs.getInt("bottom_price");
+                    String bottomName = rs.getString("bottom_name");
+                    order = new Order(orderId, new User(userId), status, date,
+                            new Topping(toppingId, toppingPrice, toppingName),
+                            new Bottom(bottomId, bottomPrice, bottomName));
                 }
             }
         }
         catch (SQLException e) {
             throw new DatabaseException(e, "Something went wrong");
         }
-        UserMapper userMapper = new UserMapper(connectionPool);
-        ToppingMapper toppingMapper = new ToppingMapper(connectionPool);
-        BottomMapper bottomMapper = new BottomMapper(connectionPool);
-        order.setUser(userMapper.getUser(order.getUser().getUserId()));
-        order.setTopping(toppingMapper.readTopping(order.getTopping().getId()));
-        order.setBottom(bottomMapper.readBottom(order.getBottom().getId()));
         return order;
     }
     
@@ -204,6 +217,22 @@ public class OrderMapper {
             }
         }
         catch (SQLException e) {
+            throw new DatabaseException(e, "Something went wrong");
+        }
+    }
+    
+    public void updateOrderStatus(Order order) throws DatabaseException {
+        String sql =
+                "UPDATE orders " +
+                "SET status = ? " +
+                "WHERE order_id = ?";
+        try (Connection connection = connectionPool.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, order.getStatus().toString());
+                ps.setInt(2, order.getOrderId());
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
             throw new DatabaseException(e, "Something went wrong");
         }
     }

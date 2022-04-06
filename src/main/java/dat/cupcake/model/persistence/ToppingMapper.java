@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class ToppingMapper {
     ConnectionPool connectionPool;
@@ -17,39 +18,24 @@ public class ToppingMapper {
     }
     
     public Topping[] getToppings() throws DatabaseException {
-        Topping[] toppings;
-        int rows = 0;
-        String rowCountSql = "SELECT count(*) FROM topping";
+        ArrayList<Topping> toppings = new ArrayList<>();
         String sql = "SELECT * FROM topping";
-        try (Connection connection = connectionPool.getConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(rowCountSql)) {
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                rows = rs.getInt("count(*)");
-                toppings = new Topping[rows];
-            }
-        }
-        catch (SQLException e) {
-            throw new DatabaseException(e, "Something went wrong");
-        }
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 ResultSet rs = ps.executeQuery();
-                int rowCount = 0;
                 while (rs.next()) {
                     int id = rs.getInt("topping_id");
                     int price = rs.getInt("topping_price");
                     String name = rs.getString("topping_name");
                     Topping topping = new Topping(id, price, name);
-                    toppings[rowCount] = topping;
-                    rowCount++;
+                    toppings.add(topping);
                 }
             }
         }
         catch (SQLException e) {
             throw new DatabaseException(e, "Something went wrong");
         }
-        return toppings;
+        return toppings.toArray(new Topping[0]);
     }
     
     public Topping readTopping(int toppingId) throws DatabaseException {

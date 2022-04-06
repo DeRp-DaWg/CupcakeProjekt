@@ -22,7 +22,8 @@
 
         <form action="" method="post">
             <div class="container">
-                <c:forEach var="order" items="${requestScope.orders}">
+                <c:forEach var="order" items="${sessionScope.orders}">
+                    <input type="hidden" id="order id" name="order id" value="${order.orderId}">
                     <div class="row">
                         <div class="col mb-3">
                             <label for="bottom" class="form-label">Bottom:</label>
@@ -42,21 +43,21 @@
                         </div>
                         <div class="col mb-3">
                             <br>
-                            <button name="buttonInput" type="submit" value="remove${order.orderId}" class="btn btn-primary">Fjern</button>
+                            <button name="button" type="submit" value="remove-${order.orderId}" class="btn btn-primary">Fjern</button>
                         </div>
                     </div>
                 </c:forEach>
                 <div class="row">
                     <div class="col mb-3">
-                        <button name="buttonInput" type="submit" value="new order" class="btn btn-primary">Ny ordre</button>
+                        <button name="button" type="submit" value="new order" class="btn btn-primary">Ny ordre</button>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col">
-                        <button name="buttonInput" type="submit" value="save" class="btn btn-primary">Gem ordre</button>
+                        <button name="button" type="submit" value="save" class="btn btn-primary">Gem ordre</button>
                     </div>
                     <div class="col">
-                        <button name="buttonInput" type="submit" value="submit" class="btn btn-primary">Bestil</button>
+                        <button name="button" type="submit" value="submit" class="btn btn-primary">Bestil</button>
                     </div>
                 </div>
             </div>
