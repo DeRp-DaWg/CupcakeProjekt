@@ -5,16 +5,16 @@
 <%@page errorPage="error.jsp" isErrorPage="false" %>
 
 <t:pagetemplate>
-    <jsp:attribute name="header">
-        Error page
+    <jsp:attribute name="title">
+        Olsker Cupcakes - Fejlside
     </jsp:attribute>
 
     <jsp:attribute name="footer">
-        Error page
+        Fejlside
     </jsp:attribute>
 
     <jsp:body>
-
+        <br>
         <p>An error has occured. This is the best message we can come up
             with right now: </p>
 

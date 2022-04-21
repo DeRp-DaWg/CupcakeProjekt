@@ -20,15 +20,15 @@ public class OrderMapper {
     }
     
     public Order[] getOrders() throws DatabaseException {
-        UserMapper userMapper = new UserMapper(connectionPool);
-        
         ArrayList<Order> orders = new ArrayList<>();
         String sql =
                 "SELECT * FROM orders " +
                 "INNER JOIN bottom " +
                 "using(bottom_id) " +
                 "INNER JOIN topping " +
-                "using(topping_id)";
+                "using(topping_id) " +
+                "INNER JOIN user " +
+                "using(user_id)";
         
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -36,6 +36,8 @@ public class OrderMapper {
                 while (rs.next()) {
                     int orderId = rs.getInt("order_id");
                     int userId = rs.getInt("user_id");
+                    String email = rs.getString("email");
+                    String role = rs.getString("role");
                     Status status = Status.valueOf(rs.getString("status"));
                     LocalDateTime date = rs.getObject("date", LocalDateTime.class);
                     int toppingId = rs.getInt("topping_id");
@@ -44,7 +46,7 @@ public class OrderMapper {
                     int bottomId = rs.getInt("bottom_id");
                     int bottomPrice = rs.getInt("bottom_price");
                     String bottomName = rs.getString("bottom_name");
-                    Order order = new Order(orderId, new User(userId), status, date,
+                    Order order = new Order(orderId, new User(userId, email, role), status, date,
                             new Topping(toppingId, toppingPrice, toppingName),
                             new Bottom(bottomId, bottomPrice, bottomName));
                     orders.add(order);
@@ -53,9 +55,6 @@ public class OrderMapper {
         }
         catch (SQLException e) {
             throw new DatabaseException(e, "Something went wrong");
-        }
-        for (Order order : orders) {
-            order.setUser(userMapper.getUser(order.getUser().getUserId()));
         }
         return orders.toArray(new Order[0]);
     }
@@ -67,13 +66,20 @@ public class OrderMapper {
                 "INNER JOIN bottom " +
                 "using(bottom_id) " +
                 "INNER JOIN topping " +
-                "using(topping_id)";
+                "using(topping_id) " +
+                "INNER JOIN user " +
+                "using(user_id) " +
+                "WHERE user_id = ?";
         
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, user.getUserId());
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     int orderId = rs.getInt("order_id");
+                    int userId = rs.getInt("user_id");
+                    String email = rs.getString("email");
+                    String role = rs.getString("role");
                     Status status = Status.valueOf(rs.getString("status"));
                     LocalDateTime date = rs.getObject("date", LocalDateTime.class);
                     int toppingId = rs.getInt("topping_id");
@@ -82,7 +88,7 @@ public class OrderMapper {
                     int bottomId = rs.getInt("bottom_id");
                     int bottomPrice = rs.getInt("bottom_price");
                     String bottomName = rs.getString("bottom_name");
-                    Order order = new Order(orderId, user, status, date,
+                    Order order = new Order(orderId, new User(userId, email, role), status, date,
                             new Topping(toppingId, toppingPrice, toppingName),
                             new Bottom(bottomId, bottomPrice, bottomName));
                     orders.add(order);
@@ -103,7 +109,7 @@ public class OrderMapper {
                 "using(bottom_id) " +
                 "INNER JOIN topping " +
                 "using(topping_id) " +
-                "WHERE user_id = ? AND (status = 'PREPARING' OR status = 'AWAITING_PICKUP')";
+                "WHERE user_id = ? AND (status = 'NOT_SUBMITTED')";
         
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -188,16 +194,23 @@ public class OrderMapper {
     
     public void updateOrder(Order order) throws DatabaseException {
         String sql =
-                "UPDATE orders " +
-                "SET topping_id = ?, bottom_id = ?, status = ?, date = ? " +
-                "WHERE order_id = ?";
+                "INSERT INTO orders (order_id, topping_id, bottom_id, user_id, status, date) " +
+                "VALUES (?, ?, ?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE topping_id = ?, bottom_id = ?, status = ?, date = ?";
         try (Connection connection = connectionPool.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, order.getTopping().getId());
-                ps.setInt(2, order.getBottom().getId());
-                ps.setString(3, order.getStatus().toString());
-                ps.setString(4, order.getDate().toString());
-                ps.setInt(5, order.getOrderId());
+                ps.setInt(1, order.getOrderId());
+                ps.setInt(2, order.getTopping().getId());
+                ps.setInt(3, order.getBottom().getId());
+                ps.setInt(4, order.getUser().getUserId());
+                ps.setString(5, order.getStatus().toString());
+                ps.setString(6, order.getDate().toString());
+                
+                ps.setInt(7, order.getTopping().getId());
+                ps.setInt(8, order.getBottom().getId());
+                ps.setString(9, order.getStatus().toString());
+                ps.setString(10, order.getDate().toString());
+                
                 ps.executeUpdate();
             }
         }

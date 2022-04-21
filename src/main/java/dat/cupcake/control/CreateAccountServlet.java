@@ -3,21 +3,18 @@ package dat.cupcake.control;
 import dat.cupcake.model.config.ApplicationStart;
 import dat.cupcake.model.entities.User;
 import dat.cupcake.model.exceptions.DatabaseException;
-import dat.cupcake.model.persistence.UserMapper;
 import dat.cupcake.model.persistence.ConnectionPool;
+import dat.cupcake.model.persistence.UserMapper;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet(name = "login", urlPatterns = {"/login"})
-public class Login extends HttpServlet {
+@WebServlet(name = "createaccount", value = "/createaccount")
+public class CreateAccountServlet extends HttpServlet {
     private ConnectionPool connectionPool;
     
     @Override
@@ -25,32 +22,29 @@ public class Login extends HttpServlet {
         this.connectionPool = ApplicationStart.getConnectionPool();
     }
     
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("createaccount.jsp").forward(request, response);
     }
     
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html");
         HttpSession session = request.getSession();
         session.setAttribute("user", null); // adding empty user object to session scope
         UserMapper userMapper = new UserMapper(connectionPool);
-        User user = null;
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        User user = new User(0, email, password, "user");
         
         try {
-            user = userMapper.login(email, password);
+            userMapper.createUser(user);
             session = request.getSession();
-            session.setAttribute("user", user); // adding user object to session scope
             request.getRequestDispatcher("index.jsp").forward(request, response);
         } catch (DatabaseException e) {
             Logger.getLogger("web").log(Level.SEVERE, e.getMessage());
             request.setAttribute("errormessage", e.getMessage());
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
-    }
-    
-    public void destroy() {
-    
     }
 }

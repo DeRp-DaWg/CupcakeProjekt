@@ -13,6 +13,10 @@ import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 @WebServlet(name = "order", value = "/order")
 public class OrderServlet extends HttpServlet {
@@ -26,6 +30,12 @@ public class OrderServlet extends HttpServlet {
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        LinkedHashMap<Order, ArrayList<Order>> orderAndAmount = new LinkedHashMap<>();
+        User user = (User) request.getSession().getAttribute("user");
+        if (user == null) {
+            response.sendRedirect("login");
+            return;
+        }
         orderMapper = new OrderMapper(connectionPool);
         ToppingMapper toppingMapper = new ToppingMapper(connectionPool);
         BottomMapper bottomMapper = new BottomMapper(connectionPool);
@@ -39,27 +49,67 @@ public class OrderServlet extends HttpServlet {
         } catch (DatabaseException e) {
             e.printStackTrace();
         }
-        request.getSession().setAttribute("orders", orders);
+        for (Order order : orders) {
+            boolean alreadyExists = false;
+            for (Order order2 : orderAndAmount.keySet()) {
+                alreadyExists = order.getTopping().equals(order2.getTopping()) && order.getBottom().equals(order2.getBottom());
+                if (alreadyExists) {
+                    orderAndAmount.get(order2).add(order);
+                    break;
+                }
+            }
+            if (!alreadyExists) {
+                orderAndAmount.put(order, new ArrayList<>());
+            }
+        }
+        request.getSession().setAttribute("ordersMap", orderAndAmount);
         request.setAttribute("toppings", toppings);
         request.setAttribute("bottoms", bottoms);
-        request.getRequestDispatcher("WEB-INF/order.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/neworder.jsp").forward(request, response);
     }
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
-        //int toppingId = Integer.parseInt(request.getParameter("topping"));
-        //int bottomId = Integer.parseInt(request.getParameter("bottom"));
-        String[] orderParameter = request.getParameterValues("order id");
-        String[] toppingParameter = request.getParameterValues("topping");
-        String[] bottomParameter = request.getParameterValues("bottom");
-        Order[] newOrders = new Order[toppingParameter.length];
-        for (int i = 0; i < toppingParameter.length; i++) {
-            int orderId = Integer.parseInt(orderParameter[i]);
-            int toppingId = Integer.parseInt(toppingParameter[i]);
-            int bottomId = Integer.parseInt(bottomParameter[i]);
-            newOrders[i] = new Order(orderId, user, Status.PREPARING, LocalDateTime.now(), new Topping(toppingId), new Bottom(bottomId));
+        String[] orderParameters = request.getParameterValues("order id");
+        String[] toppingParameters = request.getParameterValues("topping");
+        String[] bottomParameters = request.getParameterValues("bottom");
+        Order[] orders = new Order[0];
+        int amountOfOrders = 0;
+        if (orderParameters != null) {
+            for (String orderParameter : orderParameters) {
+                String[] orderIds = orderParameter.split("-");
+                amountOfOrders += orderIds.length;
+            }
         }
+        try {
+            int loopCounter = 0;
+            orders = new Order[amountOfOrders];
+            for (int i = 0; i < orderParameters.length; i++) {
+                int toppingId = Integer.parseInt(toppingParameters[i]);
+                int bottomId = Integer.parseInt(bottomParameters[i]);
+                for (String orderParameter : orderParameters[i].split("-")) {
+                    int orderId = Integer.parseInt(orderParameter);
+                    orders[loopCounter] = new Order(orderId, user, Status.NOT_SUBMITTED, LocalDateTime.now(), new Topping(toppingId), new Bottom(bottomId));
+                    loopCounter++;
+                }
+            }
+        }
+        catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        /*try {
+            orders = new Order[amountOfOrders];
+            for (int i = 0; i < amountOfOrders; i++) {
+                int orderId = Integer.parseInt(orderParameters[i]);
+                int toppingId = Integer.parseInt(toppingParameters[i]);
+                int bottomId = Integer.parseInt(bottomParameters[i]);
+                orders[i] = new Order(orderId, user, Status.NOT_SUBMITTED, LocalDateTime.now(), new Topping(toppingId), new Bottom(bottomId));
+            }
+        }
+        catch (NullPointerException e) {
+            e.printStackTrace();
+        }*/
         String[] buttonParameter = request.getParameter("button").split("-");
         String button = buttonParameter[0];
         int value = 0;
@@ -73,10 +123,20 @@ public class OrderServlet extends HttpServlet {
                 remove(user, value);
                 break;
             case "save":
-                save(user, newOrders);
+                save(user, orders);
                 break;
             case "submit":
-                submit(user);
+                submit(user, orders);
+                break;
+            case "new order":
+                save(user, orders);
+                newOrder(user);
+                break;
+            case "add to order":
+                addToOrder(user, orders, value);
+                break;
+            case "remove from order":
+                removeFromOrder(user, orders, value);
                 break;
             default:
                 break;
@@ -86,9 +146,19 @@ public class OrderServlet extends HttpServlet {
     
     private void remove(User user, int value) {
         try {
-            Order orderToDelete = orderMapper.getOrdersByUser(user)[value];
-            orderMapper.updateOrderStatus(orderToDelete);
-        } catch (DatabaseException e) {
+            Order order = null;
+            Order[] orders = orderMapper.getOrdersByUser(user);
+            for (Order tempOrder : orders) {
+                if (tempOrder.getOrderId() == value) {
+                    order = tempOrder;
+                }
+            }
+            if (order != null) {
+                order.setStatus(Status.CANCELLED);
+                orderMapper.updateOrderStatus(order);
+            }
+        }
+        catch (DatabaseException e) {
             e.printStackTrace();
         }
     }
@@ -98,12 +168,48 @@ public class OrderServlet extends HttpServlet {
             for (Order order : orders) {
                 orderMapper.updateOrder(order);
             }
-        } catch (DatabaseException e) {
+        }
+        catch (DatabaseException e) {
             e.printStackTrace();
         }
     }
     
-    private void submit(User user) {
+    private void submit(User user, Order[] orders) {
+        try {
+            for (Order order : orders) {
+                order.setStatus(Status.SUBMITTED);
+                orderMapper.updateOrderStatus(order);
+            }
+        }
+        catch (DatabaseException e) {
+            e.printStackTrace();
+        }
+        save(user, orders);
+    }
     
+    private void newOrder(User user) {
+        Order order = new Order(0, user, Status.NOT_SUBMITTED, LocalDateTime.now(), new Topping(1), new Bottom(1));
+        try {
+            orderMapper.createOrder(order);
+        }
+        catch (DatabaseException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void addToOrder(User user, Order[] orders, int orderId) {
+        for (Order order : orders) {
+            System.out.println(order);
+        }
+        System.out.println();
+        System.out.println(orderId);
+    }
+    
+    private void removeFromOrder(User user, Order[] orders, int orderId) {
+        for (Order order : orders) {
+            System.out.println(order);
+        }
+        System.out.println();
+        System.out.println(orderId);
     }
 }

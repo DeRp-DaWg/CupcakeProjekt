@@ -8,6 +8,7 @@ public class User
     private String email;
     private String password;
     private String role;
+    private int balance = 0;
     
     public User(int userId, String email, String password, String role) {
         this.userId = userId;
@@ -16,10 +17,23 @@ public class User
         this.role = role;
     }
     
+    public User(int userId, String email, String role, int balance) {
+        this.userId = userId;
+        this.email = email;
+        this.role = role;
+        this.balance = balance;
+    }
+    
     public User(String email, String password, String role)
     {
         this.email = email;
         this.password = password;
+        this.role = role;
+    }
+    
+    public User(int userId, String email, String role) {
+        this.userId = userId;
+        this.email = email;
         this.role = role;
     }
     
@@ -61,6 +75,14 @@ public class User
         this.role = role;
     }
     
+    public int getBalance() {
+        return balance;
+    }
+    
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
+    
     @Override
     public String toString() {
         return "User{" +
@@ -68,9 +90,10 @@ public class User
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
+                ", balance=" + balance +
                 '}';
     }
-
+    
     @Override
     public boolean equals(Object o)
     {

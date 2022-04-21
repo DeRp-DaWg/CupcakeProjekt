@@ -8,7 +8,7 @@
 
 
 <t:pagetemplate>
-    <jsp:attribute name="header">
+    <jsp:attribute name="title">
         Order
     </jsp:attribute>
 
@@ -17,6 +17,7 @@
     </jsp:attribute>
 
     <jsp:body>
+        <br>
 
         <h3>You can order your cupcake here</h3>
 
@@ -26,16 +27,16 @@
                     <input type="hidden" id="order id" name="order id" value="${order.orderId}">
                     <div class="row">
                         <div class="col mb-3">
-                            <label for="bottom" class="form-label">Bottom:</label>
-                            <select id="bottom" name="bottom" class="form-select">
+                            <label for="bottom-${order.orderId}" class="form-label">Bottom:</label>
+                            <select id="bottom-${order.orderId}" name="bottom" class="form-select">
                                 <c:forEach var="bottom" items="${requestScope.bottoms}">
                                     <option value="${bottom.id}" <c:if test="${bottom.id == order.bottom.id}">selected</c:if>>${bottom.name}</option>
                                 </c:forEach>
                             </select>
                         </div>
                         <div class="col mb-3">
-                            <label for="topping" class="form-label">Topping:</label>
-                            <select id="topping" name="topping" class="form-select">
+                            <label for="topping-${order.orderId}" class="form-label">Topping:</label>
+                            <select id="topping-${order.orderId}" name="topping" class="form-select">
                                 <c:forEach var="topping" items="${requestScope.toppings}">
                                     <option value="${topping.id}" <c:if test="${topping.id == order.topping.id}">selected</c:if>>${topping.name}</option>
                                 </c:forEach>

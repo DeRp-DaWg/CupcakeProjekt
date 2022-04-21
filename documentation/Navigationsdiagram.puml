@@ -1,0 +1,35 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+repeat :index/;
+:login/;
+backward :createaccount/;
+repeat while (Har en brugeren en konto?) is (Nej)
+->Ja;
+if (Har brugeren rolen admin?) then (Ja)
+    split
+    :viewaccounts/;
+    split again
+    :vieworders/;
+    split end
+endif
+split
+:order/;
+split again
+:logout/;
+split end
+
+'if (do redirect?) then (yes)
+'  :redirect process;
+'else
+'  if (do forward?) then (yes)
+'    :Forward request;
+'  else (no)
+'    :Render page template;
+'  endif
+'endif
+
+stop
+
+@enduml
