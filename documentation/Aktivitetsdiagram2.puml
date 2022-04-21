@@ -1,37 +1,26 @@
 @startuml
 'https://plantuml.com/activity-diagram-beta
 
+|Bruger|
 start
-:ClickServlet.handleRequest();
-:new page;
-if (Page.onSecurityCheck) then (true)
-  :Page.onInit();
-  if (isForward?) then (no)
-    :Process controls;
-    if (continue processing?) then (no)
-      stop
-    endif
-
-    if (isPost?) then (yes)
-      :Page.onPost();
-    else (no)
-      :Page.onGet();
-    endif
-    :Page.onRender();
-  endif
-else (false)
-endif
-
-if (do redirect?) then (yes)
-  :redirect process;
-else
-  if (do forward?) then (yes)
-    :Forward request;
-  else (no)
-    :Render page template;
-  endif
-endif
-
+:Lander på ordrer siden;
+:Brugeren giver input;
+|System|
+switch (bruger input)
+case (ny ordre)
+    :Gem alle brugerens ordre i databasen;
+    :Lav en ny ordre i databasen;
+case (tilføj en til ordre)
+    :Lav en kopi af den
+    valgte ordre i databasen;
+case (fjern en fra ordre)
+    :Fjern en kopi af den
+    valgte ordre i databasen;
+case (gem ordrer)
+    :Gem alle brugerens ordrer i datebasen;
+case (bestil ordrer)
+    :Updater alle brugerens ordrer;
+endswitch
 stop
 
 @enduml

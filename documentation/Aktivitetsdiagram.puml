@@ -12,25 +12,6 @@ repeat while (Findes et match i databasen?) is (Nej) not (Ja)
 :Giv brugeren adgang og
  gem kontoen i session;
 stop
-|Bruger|
-start
-:Lander på ordrer siden;
-:Brugeren giver input;
-|System|
-switch (bruger input)
-case (ny ordre)
-    :Lav en ny ordre i databasen;
-case (tilføj en til ordre)
-    :Lav en kopi af den
-    valgte ordre i databasen;
-case (fjern en fra ordre)
-    :Fjern en af den
-    valgte ordre i databasen;
-case (gem ordrer)
-    :Gem alle brugerens ordrer i datebasen;
-case (bestil ordrer)
-    :Updater alle brugerens ordrer;
-|Administrator|
-endswitch
-:Får opdateringerne;
+
+
 @enduml
