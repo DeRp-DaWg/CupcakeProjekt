@@ -1,3 +1,3 @@
 # Cupcake Projekt
 
-![](src/main/webapp/images/Cupcake logo.png)
+![](src/main/webapp/images/Cupcake%20logo.png)
