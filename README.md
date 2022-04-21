@@ -1,5 +1,5 @@
 # Cupcake Projekt
-
+[Link til rapport](documentation/Cupcake%20projekt.pdf)
 ## Aktivtets diagram
 ![](documentation/Aktivitetsdiagram.png)
 ## Domænemodel

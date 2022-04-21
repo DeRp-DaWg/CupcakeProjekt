@@ -47,8 +47,17 @@ package model #FF8888 {
 package webapp #88FF88 {
     package WEB-INF {
         package tags {
+            class pagetemplate << (T, orange) >>
         }
+        class order << (T, orange) >>
+        class viewaccounts << (T, orange) >>
+        class vieworders << (T, orange) >>
     }
+    class createaccount << (T, orange) >>
+    class error << (T, orange) >>
+    class index << (T, orange) >>
+    class login << (T, orange) >>
+    class orderconfirmation << (T, orange) >>
 }
 
 package control #8888FF {
@@ -67,5 +76,45 @@ package control #8888FF {
     class ViewOrdersServlet {
     }
 }
+
+order -- pagetemplate
+viewaccounts -- pagetemplate
+vieworders -- pagetemplate
+createaccount -- pagetemplate
+error -- pagetemplate
+index -- pagetemplate
+login -- pagetemplate
+orderconfirmation -- pagetemplate
+
+Login -- login
+CreateAccountServlet -- createaccount
+IndexServlet -- index
+
+OrderServlet -- order
+ViewAccountsServlet -- viewaccounts
+ViewOrdersServlet -- vieworders
+
+ConnectionPool - OrderServlet
+OrderMapper - OrderServlet
+ToppingMapper - OrderServlet
+BottomMapper - OrderServlet
+Order - OrderServlet
+User - OrderServlet
+
+ConnectionPool - Login
+UserMapper - Login
+User - Login
+
+ConnectionPool - CreateAccountServlet
+UserMapper - CreateAccountServlet
+User - CreateAccountServlet
+
+ConnectionPool - ViewAccountsServlet
+UserMapper - ViewAccountsServlet
+User - ViewAccountsServlet
+
+ConnectionPool - ViewOrdersServlet
+OrderMapper - ViewOrdersServlet
+Order - ViewOrdersServlet
 
 @enduml

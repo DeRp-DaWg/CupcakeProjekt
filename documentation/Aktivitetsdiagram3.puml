@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+|Bruger|
+|System|
+|Administrator|
+start
+:Logger ind med en administrator konto;
+|System|
+:Giver administratoren adgang til vieworders/ og viewaccounts/;
+|Administrator|
+if (Vælger et administrator view) then (vieworders/)
+    |System|
+    :Finder alle ordre i databasen;
+else (viewaccounts/)
+    |Administrator|
+    :Vælger en konto;
+    |System|
+    :Finder alle ordre for den valgte bruger;
+endif
+|Administrator|
+:Modtager valgte ordre fra systemet;
+stop
+
+@enduml
