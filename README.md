@@ -1,10 +1,10 @@
 # Cupcake Projekt
 
-##Aktivtets diagram
+## Aktivtets diagram
 ![](documentation/Aktivitetsdiagram.png)
-##Domænemodel
+## Domænemodel
 ![](documentation/Domænemodel.png)
-##ER Diagram
+## ER Diagram
 ![](documentation/ER%20Diagram.png)
-##Navigations diagram
+## Navigations diagram
 ![](documentation/Navigationsdiagram.png)
