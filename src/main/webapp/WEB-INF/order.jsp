@@ -9,55 +9,74 @@
 
 <t:pagetemplate>
     <jsp:attribute name="title">
-        Order
+        Olsker Cupcakes - Ordre
     </jsp:attribute>
 
     <jsp:attribute name="footer">
-        Order
+        Ordre
     </jsp:attribute>
 
     <jsp:body>
         <br>
-
-        <h3>You can order your cupcake here</h3>
-
         <form action="" method="post">
             <div class="container">
-                <c:forEach var="order" items="${sessionScope.orders}">
-                    <input type="hidden" id="order id" name="order id" value="${order.orderId}">
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="bottom-${order.orderId}" class="form-label">Bottom:</label>
-                            <select id="bottom-${order.orderId}" name="bottom" class="form-select">
-                                <c:forEach var="bottom" items="${requestScope.bottoms}">
-                                    <option value="${bottom.id}" <c:if test="${bottom.id == order.bottom.id}">selected</c:if>>${bottom.name}</option>
-                                </c:forEach>
-                            </select>
+                <div class="row row-cols-1 row-cols-md-4 g-4">
+                    <c:forEach var="order" items="${sessionScope.ordersMap.keySet()}">
+                        <c:set var="hiddenOrders" value="${sessionScope.ordersMap.get(order)}"/>
+                        <c:set var="amount" value="${hiddenOrders.size()+1}"/>
+                        <input type="hidden" id="order id" name="order id"
+                               value="${order.orderId}<c:forEach var="hiddenOrder" items="${hiddenOrders}">-${hiddenOrder.orderId}</c:forEach>">
+                        <div class="col">
+                            <div class="card">
+                                <!-- Lav en knap til at fjerne en ordre, og en til at tilføje en, både for at lave en kopi og en helt ny. -->
+                                <img src="${contextPath}/images/cupcakes/${order.topping.name}-${order.bottom.name}.png"
+                                     class="card-img-top" width="100%" height="140" style="background-color: grey">
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <h5 class="card-title">Pris: ${order.price * amount} kr.</h5>
+                                        <label for="topping-${order.orderId}" class="form-label">Topping</label>
+                                        <select id="topping-${order.orderId}" name="topping" class="form-select">
+                                            <c:forEach var="topping" items="${requestScope.toppings}">
+                                                <option value="${topping.id}"
+                                                        <c:if test="${topping.id == order.topping.id}">selected</c:if>>${topping.name}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="bottom-${order.orderId}" class="form-label">Bottom</label>
+                                        <select id="bottom-${order.orderId}" name="bottom" class="form-select">
+                                            <c:forEach var="bottom" items="${requestScope.bottoms}">
+                                                <option value="${bottom.id}"
+                                                        <c:if test="${bottom.id == order.bottom.id}">selected</c:if>>${bottom.name}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="amount-${order.orderId}" class="form-label">Antal</label>
+                                        <div class="input-group">
+                                            <!--
+                                            <input id="amount-${order.orderId}" name="amount" class="form-control"
+                                                   value="${amount}">
+                                            -->
+                                            <input class="form-control" type="text" value="${amount}" readonly>
+                                            <button name="button" type="submit" value="remove from order-${order.orderId}" class="btn btn-outline-secondary">-</button>
+                                            <button name="button" type="submit" value="add to order-${order.orderId}" class="btn btn-outline-secondary">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col mb-3">
-                            <label for="topping-${order.orderId}" class="form-label">Topping:</label>
-                            <select id="topping-${order.orderId}" name="topping" class="form-select">
-                                <c:forEach var="topping" items="${requestScope.toppings}">
-                                    <option value="${topping.id}" <c:if test="${topping.id == order.topping.id}">selected</c:if>>${topping.name}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="col mb-3">
-                            <br>
-                            <button name="button" type="submit" value="remove-${order.orderId}" class="btn btn-primary">Fjern</button>
-                        </div>
-                    </div>
-                </c:forEach>
-                <div class="row">
-                    <div class="col mb-3">
-                        <button name="button" type="submit" value="new order" class="btn btn-primary">Ny ordre</button>
+                    </c:forEach>
+                    <div class="col" style="min-height: 464px">
+                        <button name="button" type="submit" value="new order" class="btn btn-outline-secondary" style="width: 100%; height: 100%">Ny ordre</button>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col">
+                <br>
+                <div class="row justify-content-between">
+                    <div class="col-auto">
                         <button name="button" type="submit" value="save" class="btn btn-primary">Gem ordre</button>
                     </div>
-                    <div class="col">
+                    <div class="col-auto">
                         <button name="button" type="submit" value="submit" class="btn btn-primary">Bestil</button>
                     </div>
                 </div>

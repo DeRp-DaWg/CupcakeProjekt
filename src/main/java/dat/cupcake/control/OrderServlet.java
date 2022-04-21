@@ -65,7 +65,7 @@ public class OrderServlet extends HttpServlet {
         request.getSession().setAttribute("ordersMap", orderAndAmount);
         request.setAttribute("toppings", toppings);
         request.setAttribute("bottoms", bottoms);
-        request.getRequestDispatcher("WEB-INF/neworder.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/order.jsp").forward(request, response);
     }
     
     @Override

@@ -1,0 +1,71 @@
+@startuml
+'https://plantuml.com/class-diagram
+left to right direction
+package model #FF8888 {
+    package config {
+        class ApplicationStart {
+        }
+    }
+    package entities {
+        class Bottom {
+        }
+        class Order {
+        }
+        enum Status {
+        }
+        class Topping {
+        }
+        class User {
+        }
+        Order *-- Topping
+        Order *-- Bottom
+        Order *-- Status
+        Order o-- User
+    }
+    package exceptions {
+        class DatabaseException {
+        }
+    }
+    package persistence {
+        class BottomMapper {
+        }
+        class ConnectionPool {
+        }
+        interface IUserMapper {
+        }
+        class OrderMapper {
+        }
+        class ToppingMapper {
+        }
+        class UserMapper {
+        }
+        UserMapper --> IUserMapper
+    }
+    ApplicationStart *-- ConnectionPool
+}
+
+package webapp #88FF88 {
+    package WEB-INF {
+        package tags {
+        }
+    }
+}
+
+package control #8888FF {
+    class CreateAccountServlet {
+    }
+    class IndexServlet {
+    }
+    class Login {
+    }
+    class Logout {
+    }
+    class OrderServlet {
+    }
+    class ViewAccountsServlet {
+    }
+    class ViewOrdersServlet {
+    }
+}
+
+@enduml
